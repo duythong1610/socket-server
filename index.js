@@ -9,7 +9,7 @@ app.use(cors());
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "https://lofi-october16th.vercel.app/",
+    origin: "*",
     methods: ["GET", "POST"],
   },
 });
