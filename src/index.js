@@ -6,7 +6,6 @@ const cors = require("cors");
 
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
-const routes = require("./routes");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const ChatHistory = require("./models/ChatHistory"); // Import schema
@@ -21,7 +20,6 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-routes(app);
 mongoose
   .connect(process.env.MONGO_DB)
   .then(() => {
@@ -31,42 +29,42 @@ mongoose
     console.log(err);
   });
 
-// const server = http.createServer(app);
-// const io = new Server(server, {
-//   cors: {
-//     origin: "*",
-//     methods: ["GET", "POST"],
-//     credentials: true,
-//   },
-// });
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
 
-// function handleIncomingMessage(data) {
-//   const { userId, messageChat, userName, timeChat } = data;
+function handleIncomingMessage(data) {
+  const { userId, messageChat, userName, timeChat } = data;
 
-//   const newChat = new ChatHistory({
-//     userId: userId,
-//     content: messageChat,
-//   });
+  const newChat = new ChatHistory({
+    userId: userId,
+    content: messageChat,
+  });
 
-//   newChat
-//     .save()
-//     .then((savedChat) => {
-//       console.log("Chat history saved:", savedChat);
-//     })
-//     .catch((error) => {
-//       console.error("Error saving chat history:", error);
-//     });
-// }
+  newChat
+    .save()
+    .then((savedChat) => {
+      console.log("Chat history saved:", savedChat);
+    })
+    .catch((error) => {
+      console.error("Error saving chat history:", error);
+    });
+}
 
-// io.on("connection", (socket) => {
-//   console.log("User connected", `${socket.id}`);
+io.on("connection", (socket) => {
+  console.log("User connected", `${socket.id}`);
 
-//   socket.on("send_message", (data) => {
-//     handleIncomingMessage(data);
-//     io.emit("user-chat", data);
-//   });
-// });
+  socket.on("send_message", (data) => {
+    handleIncomingMessage(data);
+    io.emit("user-chat", data);
+  });
+});
 
-app.listen(port, () => {
+server.listen(port, () => {
   console.log("Server is running in port +", port);
 });
